@@ -2,7 +2,6 @@ import asyncio
 import getpass
 from aiohttp import web
 from aiohttp_wsgi import WSGIHandler
-from aiohttp.web import middleware
 from aiohttp.web_runner import TCPSite
 from IPython import display
 
