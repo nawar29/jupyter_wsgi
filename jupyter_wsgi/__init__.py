@@ -8,6 +8,8 @@ from IPython import display
 
 class AppViewer(object):
 
+    _exception_ = None
+    
     def __init__(self, base_url, port=8050):
         self.web_app = web.Application()
         self.port = port
@@ -31,3 +33,16 @@ class AppViewer(object):
     async def terminate(self):
         await self.site.stop()
         
+    def handle_exceptions(self, the_type):
+        def notenook_decorate(func):
+            def wrapper(arg):
+                rval = the_type()
+                try:
+                    rval = func(arg)
+                except Exception as e:
+                    self._exception_ = f'Exception: {e}'
+                else:
+                    self._exception_ = 'Exception:'
+                return rval
+            return wrapper
+        return notenook_decorate
