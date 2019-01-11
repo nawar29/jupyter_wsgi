@@ -15,6 +15,7 @@ class AppViewer(object):
         self.requests_pathname_prefix = '/user/{}/proxy/{}/'.format(getpass.getuser(), port)
         self.url = '{}/{}'.format(base_url, self.requests_pathname_prefix)
         self.site = None
+        self._running = False
         
     async def show(self, wsgi_app, width=300, height=300):
         if self.site is None:
@@ -22,10 +23,13 @@ class AppViewer(object):
             self.resource = self.web_app.router.add_route("*", "/{path_info:.*}", self.wsgi_handler)
             self.runner = web.AppRunner(self.web_app)
             await self.runner.setup()
-            self.site = TCPSite(self.runner, port=self.port)
-        await self.site.start()
-        display.display(display.IFrame(self.url, width, height))
+            self.site = TCPSite(self.runner, port=self.port)            
+        if not self._running:            
+            await self.site.start()
+            self._running = True
 
+        display.display(display.IFrame(self.url, width, height))
+            
     async def stop(self):
         await self.site.stop()
 
