@@ -1,5 +1,7 @@
 import asyncio
+import logging
 import getpass
+import traceback
 from aiohttp import web
 from aiohttp_wsgi import WSGIHandler
 from aiohttp.web_runner import TCPSite
@@ -7,16 +9,24 @@ from IPython import display
 
 class AppViewer(object):
 
-    _exception_ = None
-
+    _exception_ = ''
+    _running = False
+    site = None
+    
     def __init__(self, base_url, port=8050):
         self.web_app = web.Application()
         self.port = port
         self.requests_pathname_prefix = '/user/{}/proxy/{}/'.format(getpass.getuser(), port)
         self.url = '{}/{}'.format(base_url, self.requests_pathname_prefix)
-        self.site = None
-        self._running = False
 
+    def setup_dash(self, dash_app, debug=False, logger=None):
+        dash_app.config.update({'requests_pathname_prefix': self.requests_pathname_prefix})
+        if debug:
+            dash_app.enable_dev_tools(debug=True)
+            dash_app.server.logger.setLevel(logging.DEBUG)
+        if logger is not None:
+            dash_app.server.logger.addHandler(logger)
+    
     async def setup(self, wsgi_app):
          if self.site is None:
             self.wsgi_handler = WSGIHandler(wsgi_app)
@@ -29,9 +39,12 @@ class AppViewer(object):
         await self.setup(wsgi_app)
         if not self._running:            
             await self.site.start()
-            self._running = True
-        display.display(display.IFrame(self.url, width, height))
-
+            self._running = True        
+        self.iframe_dh = display.display(display_id=True)
+        self.iframe_dh.display( display.IFrame(self.url, width, height) )
+        self.exception_dh = display.display(display_id=True)
+        self.exception_dh.display(display.Code(self._exception_, language='python'))
+        
     async def stop(self):
         await self.site.stop()
         self._running = False
@@ -46,9 +59,10 @@ class AppViewer(object):
                 try:
                     rval = func(arg)
                 except Exception as e:
-                    self._exception_ = f'Exception: {e}'
+                    self._exception_ = traceback.format_exc()
                 else:
-                    self._exception_ = 'Exception:'
+                    self._exception_ = ''
+                self.exception_dh.update( display.Code(self._exception_, language='python') )
                 return rval
             return wrapper
         return notenook_decorate
