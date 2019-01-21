@@ -1,5 +1,5 @@
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 NAME = 'jupyter_wsgi'
@@ -23,6 +23,7 @@ else:
 
 setup(
     name=NAME,
+    packages = find_packages(),
     version=about['__version__'],
     description=DESCRIPTION,
     author=AUTHOR,
