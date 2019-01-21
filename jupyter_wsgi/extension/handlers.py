@@ -40,7 +40,17 @@ class WSGIHandler(IPythonHandler):
     
 class IndexHandler(IPythonHandler):
     _endpoints = []
+    _extension_path = 'wsgi'
+    _base_url = None
     
+    @classmethod
+    def set_extension_path(cls, extension_path):
+        cls._extension_path = extension_path
+    
+    @classmethod
+    def set_base_url(cls, extension_path):
+        cls._base_url = extension_path
+
     @classmethod
     def add_endpoint(cls, endpoint, title, import_name):
         cls._endpoints.append((endpoint, title, import_name))
@@ -52,7 +62,10 @@ class IndexHandler(IPythonHandler):
             for endpoint, title, mod_name in self._endpoints:            
                 ul += f"<li><a href='{endpoint}'>{title}</a></li>"
             ul += '</ul>'
-            body = f'<html><body><p>{path}</p>{ul}</body></html>'
+            body = f'''<html><body>
+                        <H1>{self._extension_path}:</H1>
+                          {ul}
+                       </body></html>'''
         else:
             body = f'<html><body>No wsgi extensions found</body></html>'
             self.set_header("Content-Type", "text/html")

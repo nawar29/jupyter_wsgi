@@ -32,14 +32,18 @@ def load_jupyter_server_extension(nb_server_app):
             wsgi_modules = jupyter_wsgi_conf.get('wsgi_modules', [])
             debug = jupyter_wsgi_conf.get('debug', False)
             break
-            
-    app_log.warning( f'{wsgi_modules} {extension_path} {debug}' )    
+
+    root_endpoint = url_path_join(jupyter_base_url, extension_path)
+
+    IndexHandler.set_extension_path(root_endpoint)
+    IndexHandler.set_base_url(jupyter_base_url)    
+    
     handlers = []
     for import_name in wsgi_modules:
         app_log.warning( f'Loading {import_name}' )
         try:
             mod = importlib.import_module(f'{import_name}.extension')
-            endpoint = url_path_join( jupyter_base_url, extension_path, import_name.split('.')[-1] +'/')
+            endpoint = url_path_join( root_endpoint, import_name.split('.')[-1] +'/')
             mod.setup( requests_pathname_prefix=endpoint, routes_pathname_prefix=endpoint, debug=debug )
             app = mod.wsgi_app
             
@@ -51,8 +55,7 @@ def load_jupyter_server_extension(nb_server_app):
         except:
             app_log.exception("Error loading server extension %s", import_name)
 
-    endpoint = url_path_join(jupyter_base_url, extension_path)
-    app_log.info( f'Serving wsgi index at {endpoint}' )  
-    handlers.append( (endpoint, IndexHandler)  )
+    app_log.info( f'Serving wsgi index at {root_endpoint}' )  
+    handlers.append( (root_endpoint, IndexHandler)  )
     web_app.add_handlers('.*$', handlers )
 
