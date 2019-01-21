@@ -3,7 +3,7 @@ from setuptools import setup
 
 
 NAME = 'jupyter_wsgi'
-DESCRIPTION = 'Run a wsgi app in a Jupyter Notebook'
+DESCRIPTION = 'Run WSGI app in a Jupyter notebook or as a Jupyter server extension'
 URL = 'https://github.com/ihenry42/jupyter_wsgi'
 EMAIL = 'ihenry42@gmail.com'
 AUTHOR = 'Isaac Henry'
@@ -11,7 +11,7 @@ REQUIRES_PYTHON = '>=3.6.0'
 VERSION = '0.1.0'
 
 REQUIRED = [
-    'aiohttp', 'aiohttp_wsgi'
+    'aiohttp', 'aiohttp_wsgi', 'notebook', 'pyyaml', 'tornado'
 ]
 
 about = {}
