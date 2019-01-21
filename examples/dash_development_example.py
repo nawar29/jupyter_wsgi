@@ -8,7 +8,7 @@
    "source": [
     "# Dash App\n",
     "import logging\n",
-    "from jupyter_wsgi import AppViewer\n",
+    "from jupyter_wsgi.viewer import AppViewer\n",
     "import dash\n",
     "import dash_html_components as html\n",
     "import dash_core_components as dcc\n",
@@ -26,7 +26,7 @@
     "logging.getLogger().addHandler( logfnh )\n",
     "\n",
     "# Get a AppViewer object, you need to give it the base of your url:\n",
-    "viewer = AppViewer('https://jupyter.soterawireless.io',port=8052)\n",
+    "viewer = AppViewer('https://jupyter.soterawireless.io', port=8052)\n",
     "\n",
     "# Create a dash app\n",
     "app = dash.Dash(__name__)\n",
@@ -55,7 +55,7 @@
    "source": [
     "testme = \"foo\"\n",
     "\n",
-    "def my_print_f (value,  testme):\n",
+    "def my_print_f(value,  testme):\n",
     "    return f'You entered \"{value}\"\\ntestme = \"{testme}\"\"\\n '\n"
    ]
   },
@@ -84,8 +84,8 @@
     "    # https://dash.plot.ly/sharing-data-between-callbacks\n",
     "\n",
     "    global testme  # you can see global variables from the notebook \n",
-    "    string_ = my_prin_f(input_value, testme) # you can use functions from the notebook\n",
-    "    return string_\n"
+    "    string_ = my_print_f(input_value, testme) # you can use functions from the notebook\n",
+    "    return string_"
    ]
   },
   {

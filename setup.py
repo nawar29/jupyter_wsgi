@@ -11,7 +11,7 @@ REQUIRES_PYTHON = '>=3.6.0'
 VERSION = '0.1.0'
 
 REQUIRED = [
-    'aiohttp', 'aiohttp_wsgi', 'notebook', 'pyyaml', 'tornado'
+    'aiohttp', 'aiohttp_wsgi', 'notebook', 'pyyaml'
 ]
 
 about = {}
