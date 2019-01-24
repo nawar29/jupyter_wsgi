@@ -44,14 +44,16 @@ def load_jupyter_server_extension(nb_server_app):
         try:
             mod = importlib.import_module(f'{import_name}.extension')
             endpoint = url_path_join( root_endpoint, import_name.split('.')[-1] +'/')
-            mod.setup( requests_pathname_prefix=endpoint, routes_pathname_prefix=endpoint, debug=debug )
-            app = mod.wsgi_app
+            environ = dict(endpoint=endpoint, debug=debug, extension_title=None )
+            app = mod.setup( environ )
             
-            if app is not None:
+            if app is None:
+                app_log.warning( f'Failed to load {import_name} at {endpoint}' )
+
+            else:
                 IndexHandler.add_endpoint( endpoint, getattr(mod, 'title', import_name), import_name )           
                 handlers.append( (f'{endpoint}.*$', WSGIHandler, dict(app=WSGIContainer(app))) )
                 app_log.info( f'Loaded {import_name} at {endpoint}' )  
-
         except:
             app_log.exception("Error loading server extension %s", import_name)
 
