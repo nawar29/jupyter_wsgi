@@ -1,11 +1,34 @@
 import yaml
 import os.path
 import importlib
+import signal
+from contextlib import contextmanager
 from notebook.utils import url_path_join
 from notebook.extensions import SYSTEM_CONFIG_PATH
 from tornado.wsgi import WSGIContainer
 from tornado.log import access_log, app_log
 from .handlers import WSGIHandler, IndexHandler
+
+
+@contextmanager
+def timeout(time):
+    # Register a function to raise a TimeoutError on the signal.
+    signal.signal(signal.SIGALRM, raise_timeout).
+    # Schedule the signal to be sent after ``time``.
+    signal.alarm(time)
+
+    try:
+        yield
+    except TimeoutError:
+        pass
+    finally:
+        # Unregister the signal so it won't be triggered
+        # if the timeout is not reached.
+        signal.signal(signal.SIGALRM, signal.SIG_IGN)
+
+
+def raise_timeout(signum, frame):
+    raise TimeoutError
 
 def _jupyter_server_extension_paths():
     return [{
@@ -45,7 +68,8 @@ def load_jupyter_server_extension(nb_server_app):
             mod = importlib.import_module(f'{import_name}.extension')
             endpoint = url_path_join( root_endpoint, import_name.split('.')[-1] +'/')
             environ = dict(endpoint=endpoint, debug=debug, extension_title=None )
-            app = mod.setup( environ )
+            with timeout(3):
+                app = mod.setup( environ )
             
             if app is None:
                 app_log.warning( f'Failed to load {import_name} at {endpoint}' )
